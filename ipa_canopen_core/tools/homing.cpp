@@ -6,7 +6,6 @@
 // See the user manual for details:
 // https://github.com/ipa-tys/canopen/blob/master/doc/usermanual.pdf?raw=true
 
-#include <utility>
 #include "canopen.h"
 
 int main(int argc, char *argv[]) {

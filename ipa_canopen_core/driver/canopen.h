@@ -43,6 +43,7 @@ namespace canopen {
     incomingPDOHandlers;
 
   void incomingNodeguardHandler(uint8_t CANid, BYTE data[8]);
+  void emergencyHandler(uint8_t CANid, BYTE data[8]);
   void statusword_incoming(uint8_t CANid, BYTE data[8]);
   void modes_of_operation_display_incoming(uint8_t CANid, BYTE data[8]);
 
@@ -138,6 +139,8 @@ namespace canopen {
 
   const SDOkey statusword(0x6041, 0x0);
   const SDOkey controlword(0x6040, 0x0);
+  const SDOkey target_position(0x607A, 0x0);
+  const SDOkey profile_velocity(0x6081, 0x0);
   const SDOkey sync_timeout_factor(0x200e, 0x0);
   const SDOkey ip_time_units(0x60C2, 0x1);
   const SDOkey ip_time_index(0x60C2, 0x2);
@@ -161,6 +164,10 @@ namespace canopen {
   const uint16_t controlword_enable_ip_mode = 16;
   const uint16_t controlword_fault_reset_0 = 0x00;
   const uint16_t controlword_fault_reset_1 = 0x80;
+  const uint16_t controlword_change_set_immediately_0 = 0x0 << 5;
+  const uint16_t controlword_change_set_immediately_1 = 0x1 << 5;
+  const uint16_t controlword_new_setpoint_0 = 0x0 << 4;
+  const uint16_t controlword_new_setpoint_1 = 0x1 << 4;
 
   // ----------------- CAN communication functions: --------------
 
