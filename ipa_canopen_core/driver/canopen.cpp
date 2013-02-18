@@ -11,7 +11,7 @@ namespace canopen {
 
   std::map<SDOkey, std::function<void (uint8_t CANid, BYTE data[8])> > incomingDataHandlers
   { { statusword, statusword_incoming },
-      { modes_of_operation_display, modes_of_operation_display_incoming }  };
+      { modes_of_operation_display, modes_of_operation_display_incoming }};
 
   std::map<uint16_t, std::function<void (const TPCANRdMsg m)> > incomingPDOHandlers;
 
@@ -33,9 +33,11 @@ namespace canopen {
     // if (devices[CANid].motorState_ == "fault")
     while (devices[CANid].motorState_ != targetState) {
       canopen::sendSDO(CANid, canopen::statusword);
+      std::cout << "state: " << devices[CANid].motorState_ << std::endl;
+
       if (devices[CANid].motorState_ == "fault") {
 	canopen::sendSDO(CANid, canopen::controlword, canopen::controlword_fault_reset_0);
-	std::this_thread::sleep_for(std::chrono::milliseconds(50));
+	std::this_thread::sleep_for(std::chrono::milliseconds(200));
 	canopen::sendSDO(CANid, canopen::controlword, canopen::controlword_fault_reset_1);
 	std::this_thread::sleep_for(std::chrono::milliseconds(200));
       }
@@ -113,8 +115,16 @@ namespace canopen {
 	SDOkey sdoKey(m);
 	if (incomingDataHandlers.find(sdoKey) != incomingDataHandlers.end())
 	  incomingDataHandlers[sdoKey](m.Msg.ID - 0x580, m.Msg.DATA);
-      } else if (m.Msg.ID >= 0x700 && m.Msg.ID <= 0x7FF) 
+      } else if (m.Msg.ID >= 0x700 && m.Msg.ID <= 0x7FF) { // incoming nodeguard
 	incomingNodeguardHandler(m.Msg.ID - 0x700, m.Msg.DATA);
+      } else if (m.Msg.ID >= 0x81 && m.Msg.ID <= 101) { // incoming emergency
+	emergencyHandler(m.Msg.ID - 0x81, m.Msg.DATA);
+      } else {
+	std::cout << "Other message incoming!" << std::endl;
+	for (int i=0;i<8;i++)
+	  printf("%02x ", m.Msg.DATA[i]);
+	std::cout << std::endl;
+      }
     }
   }
 
@@ -149,6 +159,13 @@ namespace canopen {
 
   void incomingNodeguardHandler(uint8_t CANid, BYTE data[8]) {
     // update variables of the corresponding device object with nodeguard info
+  }
+
+  void emergencyHandler(uint8_t CANid, BYTE data[8]) {
+    std::cout << "EMERGENCY incoming!" << std::endl;
+    for (int i=0; i<8; i++) 
+      printf("%02x ", data[i]);
+    std::cout << std::endl;
   }
 
   void statusword_incoming(uint8_t CANid, BYTE data[8]) {
